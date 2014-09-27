@@ -1,4 +1,4 @@
 auto: true
 markdown: rdiscount
 pygments: true
-permalink: /blog33/:title
+permalink: /blog/:title
