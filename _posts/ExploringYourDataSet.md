@@ -11,137 +11,69 @@ summary: Using Correlations To Understand Your Data
 image: post_three.jpg
 ---
 
-A great way to explore a new data set is to run a pairwise correlation matrix against it. This will pair every combination of your variables and measure the ensuing correlation between them.
+<div class="row">   
+    <div class="span9 columns">
+      <h2>Preface</h2>
+      <p>So you added a third party dll to your project and now you need to sign it.  Sometimes you might not have the code to modify the assembly and add your strong name key.  This post will describe how you can go about signing a third party assembly without compiling the code.</p>
+      <p><a href="http://www.microsoft.com/en-us/download/details.aspx?id=19988" alt="Go to Microsoft Download Center" class="btn btn-info" target="_blank">Download .NET Framework 2.0</a></p>
+        <h2>Create a Strong Name Key</h2>
+        <p>First you'll need to get your existing strong name key (.snk) or <a href="http://msdn.microsoft.com/en-us/library/6f05ezxy(v=vs.71).aspx" alt="Go to Microsoft and read more" target="_blank">create a strong name key</a></p>
+        <h2>Use Ildasm to Sign a Third Party Assembly</h2>
+        <p>I choose to use <a href="http://msdn.microsoft.com/en-us/library/f7dy01k1(v=vs.80).aspx" target="_blank" alt="Go to MSFT Ildasm">Microsoft intermediate language Disassembler</a> (Ildasm) after having issues with <a href="http://msdn.microsoft.com/en-us/library/c405shex.aspx" alt="Go to MSDN to read more" target="_blank">Assembly Linker</a> so go and download <a href="http://www.microsoft.com/en-us/download/details.aspx?id=19988" alt="Go to Microsoft to download and read more" target="_blank">.Net Framework 2.0</a> from Microsoft if you don't already have it.</p>
+        <h2>First Disassemble the ThirdParty.dll</h2>
+        <p>Open a Visual Studio Command Prompt and type the following command:</p>
+        <p><pre><code>D:\Common\ThirdParty>ildasm /all /out=ThirdParty.il ThirdParty.dll</code></pre></p>
+        <p>This will create a file called ThirdParty.il which will be used next to sign and build.</p>
+        <h2>Second Rebuild and Sign the ThirdParty.dll</h2>
+        <p>Rename or backup your original third party assembly. Open a Visual Studio Command Prompt and type the following command:</p>     
+        <p><pre><code>D:\Common\ThirdParty>ilasm /dll /key=YourKey.snk ThirdParty.il</code></pre></p>               
+        <h2>Finally Verify Assembly was Signed</h2>
+        <p>You'll want to verify that your assembly is now signed.  To do this Open an Visual Studio Command Prompt and type the following command:</p>
+        <p><pre><code>sn -vf ThirdParty.dll</code></pre></p>
+        <p>You should get an output similar to..</p>
+        <p><pre><code>Assembly 'ThirdParty.dll' is valid</code></pre></p>
+        <h2>Conclusion</h2>
+        <p>This is certainly happy path and only works with assemblies built using .NET libraries.  If other libraries are included in the assembly you are trying to sign then you'll have to do some additional steps not listed on this post.</p>
+    </div>
+</div> 
 
-To help us understand this process, let's download the [adult.data set](https://archive.ics.uci.edu/ml/datasets/Adult) from the UCI Machine Learning Repository. This data is based on the 1994 Census and attempts to predict those with income exceeding $50K/year:
+<div class="row">   
+    <div class="span9 column">
+            <p class="pull-right">{% if page.previous.url %} <a href="{{page.previous.url}}" title="Previous Post: {{page.previous.title}}"><i class="icon-chevron-left"></i></a>   {% endif %}   {% if page.next.url %}    <a href="{{page.next.url}}" title="Next Post: {{page.next.title}}"><i class="icon-chevron-right"></i></a>   {% endif %} </p>  
+    </div>
+</div>
 
-```r
-library(RCurl) # download https data
-urlfile <- 'https://archive.ics.uci.edu/ml/machine-learning-databases/adult/adult.data'
-x <- getURL(urlfile, ssl.verifypeer = FALSE)
-adults <- read.csv(textConnection(x), header=F)
+<div class="row">   
+    <div class="span9 columns">    
+        <h2>Comments Section</h2>
+        <p>Feel free to comment on the post but keep it clean and on topic.</p> 
+        <div id="disqus_thread"></div>
+        <script type="text/javascript">
+            /* * * CONFIGURATION VARIABLES: EDIT BEFORE PASTING INTO YOUR WEBPAGE * * */
+            var disqus_shortname = 'ericjones'; // required: replace example with your forum shortname
+            var disqus_identifier = '{{ page.url }}';
+            var disqus_url = 'http://erjjones.github.com{{ page.url }}';
+            
+            /* * * DON'T EDIT BELOW THIS LINE * * */
+            (function() {
+                var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+                dsq.src = 'http://' + disqus_shortname + '.disqus.com/embed.js';
+                (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+            })();
+        </script>
+        <noscript>Please enable JavaScript to view the <a href="http://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+        <a href="http://disqus.com" class="dsq-brlink">blog comments powered by <span class="logo-disqus">Disqus</span></a>
+    </div>
+</div>
 
-# if the above getURL command fails, try this:
-# adults <-read.csv('https://archive.ics.uci.edu/ml/machine-learning-databases/adult/adult.data', header=F)
-```
-<BR>
-We fill in the missing headers for the UCI set and cast the outcome variable 'income' to a binary format of 1 and 0:
+<!-- Twitter -->
+<script>!function(d,s,id){var js,fjs=d.getElementsByTagName(s)[0];if(!d.getElementById(id)){js=d.createElement(s);js.id=id;js.src="//platform.twitter.com/widgets.js";fjs.parentNode.insertBefore(js,fjs);}}(document,"script","twitter-wjs");</script>
 
-```r
-names(adults)=c('age','workclass','fnlwgt','education','educationNum',
-                'maritalStatus','occupation','relationship','race',
-                'sex','capitalGain','capitalLoss','hoursWeek',
-                'nativeCountry','income')
-
-adults$income <- ifelse(adults$income==' <=50K',1,0)
-```
-<BR>
-We load the **caret** package to dummify (binarize) all factor variables as the correlation function only accepts numerical values:
-
-
-```r
-dmy <- dummyVars(" ~ .", data = adults)
-adultsTrsf <- data.frame(predict(dmy, newdata = adults))
-```
-<BR>
-We borrow two very useful functions from [Stephen Turner](https://gist.github.com/stephenturner/3492773): **cor.prob** and **flattenSquareMatrix**
-
-<BR>
-We submit the transformed data set to the **cor.prob** function in order to create a pairwise correlation matrix with P-values and to flatten the result set:
-
-```r
-corMasterList <- flattenSquareMatrix (cor.prob(adultsTrsf))
-print(head(corMasterList,10))
-```
-
-```
-##                         i                       j       cor         p
-## 1                     age            workclass...  0.042627 1.421e-14
-## 2                     age  workclass..Federal.gov  0.051227 0.000e+00
-## 3            workclass...  workclass..Federal.gov -0.042606 1.454e-14
-## 4                     age    workclass..Local.gov  0.060901 0.000e+00
-## 5            workclass...    workclass..Local.gov -0.064070 0.000e+00
-## 6  workclass..Federal.gov    workclass..Local.gov -0.045682 2.220e-16
-## 7                     age workclass..Never.worked -0.019362 4.759e-04
-## 8            workclass... workclass..Never.worked -0.003585 5.178e-01
-## 9  workclass..Federal.gov workclass..Never.worked -0.002556 6.447e-01
-## 10   workclass..Local.gov workclass..Never.worked -0.003843 4.880e-01
-```
-<BR>
-We create a single vector of variable names (using the original names, not the dummified ones) by filtering those with an absolute correlation of 0.2 against or higher against our outcome variable of 'income':
-
-```r
-corList <- corMasterList[order(corMasterList$cor),]
-selectedSub <- subset(corList, (abs(cor) > 0.2 & j == 'income'))
-bestSub <-  sapply(strsplit(as.character(selectedSub$i),'[.]'), "[", 1)
-bestSub <- unique(bestSub)
-```
-Finally we plot the highly correlated pairs using the **psych** packages **pair.panels** plot (this can be done on the original data as **pair.panels** can handle factor and character variables):
-<BR>
-
-
-
-```r
-pairs.panels(adults[c(bestSub, 'income')])
-```
-
-![plot of chunk unnamed-chunk-9](figure/unnamed-chunk-9.png) 
-<BR>
-Full Source:
-
-```r
-library(RCurl) # download https data
-urlfile <- 'https://archive.ics.uci.edu/ml/machine-learning-databases/adult/adult.data'
-x <- getURL(urlfile, ssl.verifypeer = FALSE)
-adults <- read.csv(textConnection(x), header=F)
-
-# if the above getURL command fails, try this:
-# adults <-read.csv('https://archive.ics.uci.edu/ml/machine-learning-databases/adult/adult.data', header=F)
-
-names(adults)=c('age','workclass','fnlwgt','education','educationNum',
-                'maritalStatus','occupation','relationship','race',
-                'sex','capitalGain','capitalLoss','hoursWeek',
-                'nativeCountry','income')
-
-adults$income <- ifelse(adults$income==' <=50K',1,0)
-
-library(caret)
-dmy <- dummyVars(" ~ .", data = adults)
-adultsTrsf <- data.frame(predict(dmy, newdata = adults))
-
-## Correlation matrix with p-values. See http://goo.gl/nahmV for documentation of this function
-cor.prob <- function (X, dfr = nrow(X) - 2) {
-        R <- cor(X, use="pairwise.complete.obs")
-        above <- row(R) < col(R)
-        r2 <- R[above]^2
-        Fstat <- r2 * dfr/(1 - r2)
-        R[above] <- 1 - pf(Fstat, 1, dfr)
-        R[row(R) == col(R)] <- NA
-        R
-}
- 
-## Use this to dump the cor.prob output to a 4 column matrix
-## with row/column indices, correlation, and p-value.
-## See StackOverflow question: http://goo.gl/fCUcQ
-flattenSquareMatrix <- function(m) {
-        if( (class(m) != "matrix") | (nrow(m) != ncol(m))) stop("Must be a square matrix.")
-        if(!identical(rownames(m), colnames(m))) stop("Row and column names must be equal.")
-        ut <- upper.tri(m)
-        data.frame(i = rownames(m)[row(m)[ut]],
-                   j = rownames(m)[col(m)[ut]],
-                   cor=t(m)[ut],
-                   p=m[ut])
-}
-
-corMasterList <- flattenSquareMatrix (cor.prob(adultsTrsf))
-print(head(corMasterList,10))
-
-corList <- corMasterList[order(corMasterList$cor),]
-selectedSub <- subset(corList, (abs(cor) > 0.2 & j == 'income'))
-bestSub <-  sapply(strsplit(as.character(selectedSub$i),'[.]'), "[", 1)
-bestSub <- unique(bestSub)
-
-library(psych)
-pairs.panels(adults[c(bestSub, 'income')])
-```
-
+<!-- Google + -->
+<script type="text/javascript">
+  (function() {
+    var po = document.createElement('script'); po.type = 'text/javascript'; po.async = true;
+    po.src = 'https://apis.google.com/js/plusone.js';
+    var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(po, s);
+  })();
+</script>
