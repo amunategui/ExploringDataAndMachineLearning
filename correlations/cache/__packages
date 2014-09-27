@@ -1,10 +1,4 @@
 base
 bitops
-datasets
-graphics
-grDevices
 knitr
-methods
 RCurl
-stats
-utils
