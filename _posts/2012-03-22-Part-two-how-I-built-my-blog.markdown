@@ -38,12 +38,12 @@ image: post_two.jpg
 	  <p>List all tags within your site.</p>	  
 	  <ul>
 		{% for tag in site.tags %}		
-			<li><a href="/tags/{{ tag[0] }}">{{ tag[0] }}</a></li>
+			<li><a href="/ExploringDataAndMachineLearning/tags/{{ tag[0] }}">{{ tag[0] }}</a></li>
 		{% endfor %}
 	  </ul>
 	  <script src="https://gist.github.com/2155275.js"></script>
 	  <p>List all tags for a post.</p>	  
-	  <p><small><i class="icon-tags"></i> {% for tag in page.tags %} <a href="/tags/{{ tag }}" title="View posts tagged with &quot;{{ tag }}&quot;"><u>{{ tag }}</u></a>  {% if forloop.last != true %} {% endif %} {% endfor %} </small></p>
+	  <p><small><i class="icon-tags"></i> {% for tag in page.tags %} <a href="/ExploringDataAndMachineLearning/tags/{{ tag }}" title="View posts tagged with &quot;{{ tag }}&quot;"><u>{{ tag }}</u></a>  {% if forloop.last != true %} {% endif %} {% endfor %} </small></p>
 	  <script src="https://gist.github.com/2155281.js"></script>	  
 	  <hr>
 	  <h2>Disqus</h2>
