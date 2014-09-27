@@ -1,7 +1,7 @@
 ---
 layout: post
 title: Using Correlations To Understand Your Data
-category: Coding
+category: Data
 tags: jekyll bootstrap github disqus
 year: 2014
 month: 9
